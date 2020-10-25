@@ -1,8 +1,8 @@
 {
     "name": "comunedifirenze/user-bundle",
     "type": "symfony-bundle",
-    "description": "Kimai UserBundle",
-    "homepage": "https://www.kimai.org",
+    "description": "Comune di Firenze Symfony UserBundle",
+    "homepage": "https://github.com/ComuneFI",
     "license": "MIT",
     "authors": [
         {
@@ -19,6 +19,10 @@
         {
             "name": "Kevin Papst",
             "homepage": "https://www.kevinpapst.de"
+        },
+        {
+            "name": "Andrea Manzi",
+            "homepage": "https://github.com/manzolo"
         }
     ],
     "require": {
