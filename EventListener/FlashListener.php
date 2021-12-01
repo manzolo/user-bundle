@@ -12,12 +12,13 @@
 namespace FOS\UserBundle\EventListener;
 
 use FOS\UserBundle\FOSUserEvents;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class FlashListener implements EventSubscriberInterface
-{
+class FlashListener implements EventSubscriberInterface {
+
     /**
      * @var string[]
      */
@@ -38,18 +39,20 @@ class FlashListener implements EventSubscriberInterface
 
     /**
      * FlashListener constructor.
+     *
+     * @param RequestStack        $requestStack
+     * @param TranslatorInterface $translator
      */
-    public function __construct(SessionInterface $session, TranslatorInterface $translator)
+    public function __construct(RequestStack $requestStack, TranslatorInterface $translator)
     {
-        $this->session = $session;
+        $this->session = $requestStack->getSession();
         $this->translator = $translator;
     }
 
     /**
      * {@inheritdoc}
      */
-    public static function getSubscribedEvents() : array
-    {
+    public static function getSubscribedEvents(): array {
         return [
             FOSUserEvents::REGISTRATION_COMPLETED => 'addSuccessFlash',
             FOSUserEvents::RESETTING_RESET_COMPLETED => 'addSuccessFlash',
@@ -59,8 +62,7 @@ class FlashListener implements EventSubscriberInterface
     /**
      * @param string $eventName
      */
-    public function addSuccessFlash($event, $eventName)
-    {
+    public function addSuccessFlash($event, $eventName) {
         if (!isset(self::$successMessages[$eventName])) {
             throw new \InvalidArgumentException('This event does not correspond to a known flash message');
         }
@@ -73,8 +75,8 @@ class FlashListener implements EventSubscriberInterface
      *
      * @return string
      */
-    private function trans($message, array $params = [])
-    {
+    private function trans($message, array $params = []) {
         return $this->translator->trans($message, $params, 'FOSUserBundle');
     }
+
 }
