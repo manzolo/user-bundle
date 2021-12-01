@@ -11,9 +11,10 @@
 
 namespace FOS\UserBundle\Util;
 
+use Exception;
 use FOS\UserBundle\Model\UserInterface;
-use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
-use Symfony\Component\Security\Core\Encoder\SelfSaltingEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
+use Symfony\Component\PasswordHasher\LegacyPasswordHasherInterface;
 
 /**
  * Class updating the hashed password in the user when there is a new password.
@@ -22,32 +23,60 @@ use Symfony\Component\Security\Core\Encoder\SelfSaltingEncoderInterface;
  */
 class PasswordUpdater implements PasswordUpdaterInterface
 {
-    private $encoderFactory;
+    /**
+     * @var PasswordHasherFactoryInterface
+     */
+    private $passwordHasherFactory;
 
-    public function __construct(EncoderFactoryInterface $encoderFactory)
+    /**
+     * @param PasswordHasherFactoryInterface $passwordHasherFactory
+     */
+    public function __construct(PasswordHasherFactoryInterface $passwordHasherFactory)
     {
-        $this->encoderFactory = $encoderFactory;
+        $this->passwordHasherFactory = $passwordHasherFactory;
     }
 
-    public function hashPassword(UserInterface $user)
+    /**
+     * @param UserInterface $user
+     */
+    public function hashPassword(UserInterface $user): void
     {
         $plainPassword = $user->getPlainPassword();
 
-        if (0 === strlen($plainPassword)) {
+        if (empty($plainPassword)) {
             return;
         }
 
-        $encoder = $this->encoderFactory->getEncoder($user);
+        $passwordHasher = $this->passwordHasherFactory->getPasswordHasher($user);
 
-        if ($encoder instanceof SelfSaltingEncoderInterface) {
-            $user->setSalt(null);
-        } else {
-            $salt = rtrim(str_replace('+', '.', base64_encode(random_bytes(32))), '=');
+        /** @var string $hashedPassword */
+        if ($passwordHasher instanceof LegacyPasswordHasherInterface) {
+            $salt = $this->createSalt();
             $user->setSalt($salt);
+
+            $hashedPassword = $passwordHasher->hash($plainPassword, $user->getSalt());
+        } else {
+            $user->setSalt(null);
+
+            $hashedPassword = $passwordHasher->hash($plainPassword);
         }
 
-        $hashedPassword = $encoder->encodePassword($plainPassword, $user->getSalt());
         $user->setPassword($hashedPassword);
         $user->eraseCredentials();
+    }
+
+    /**
+     * @return string
+     */
+    private function createSalt(): string
+    {
+        /** @var string $bytes */
+        try {
+            $bytes = random_bytes(32);
+        } catch (Exception $e) {
+            $bytes = '';
+        }
+
+        return rtrim(str_replace('+', '.', base64_encode($bytes)), '=');
     }
 }

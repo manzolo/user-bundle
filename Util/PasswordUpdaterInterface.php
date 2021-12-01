@@ -12,6 +12,7 @@
 namespace FOS\UserBundle\Util;
 
 use FOS\UserBundle\Model\UserInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
 /**
  * @author Christophe Coevoet <stof@notk.org>
@@ -19,12 +20,17 @@ use FOS\UserBundle\Model\UserInterface;
 interface PasswordUpdaterInterface
 {
     /**
+     * @param PasswordHasherFactoryInterface $passwordHasherFactory
+     */
+    public function __construct(PasswordHasherFactoryInterface $passwordHasherFactory);
+
+    /**
      * Updates the hashed password in the user when there is a new password.
      *
      * The implement should be a no-op in case there is no new password (it should not erase the
      * existing hash with a wrong one).
      *
-     * @return void
+     * @param UserInterface $user
      */
-    public function hashPassword(UserInterface $user);
+    public function hashPassword(UserInterface $user): void;
 }
