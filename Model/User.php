@@ -193,7 +193,7 @@ abstract class User implements UserInterface
     /**
      * {@inheritdoc}
      */
-    public function getUsername()
+    public function getUsername() : string
     {
         return $this->username;
     }
@@ -209,7 +209,7 @@ abstract class User implements UserInterface
     /**
      * {@inheritdoc}
      */
-    public function getSalt()
+    public function getSalt() : ?string
     {
         return $this->salt;
     }
@@ -233,7 +233,7 @@ abstract class User implements UserInterface
     /**
      * {@inheritdoc}
      */
-    public function getPassword()
+    public function getPassword() : ?string
     {
         return $this->password;
     }
@@ -267,7 +267,7 @@ abstract class User implements UserInterface
     /**
      * {@inheritdoc}
      */
-    public function getRoles()
+    public function getRoles() : array
     {
         $roles = $this->roles;
 
@@ -495,7 +495,7 @@ abstract class User implements UserInterface
     /**
      * {@inheritdoc}
      */
-    public function isEqualTo(BaseUserInterface $user)
+    public function isEqualTo(BaseUserInterface $user) : bool
     {
         if (!$user instanceof self) {
             return false;
